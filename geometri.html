@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Taplak Step 9 (Final Ornamen)</title>
+  <style>
+    body { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      background: #f5efe6; 
+    }
+    canvas { background: #fdfaf5; }
+  </style>
+</head>
+<body>
+  <canvas id="myCanvas" width="500" height="500"></canvas>
+
+  <script>
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+    const CX = canvas.width / 2;
+    const CY = canvas.height / 2;
+
+    /* ==== Fungsi Helper Bentuk Dasar ==== */
+    function drawSquare(size, fill, stroke) {
+      ctx.beginPath();
+      ctx.rect(-size/2, -size/2, size, size);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+
+    function drawTriangle(size, fill, stroke) {
+      ctx.beginPath();
+      ctx.moveTo(0, size/2);
+      ctx.lineTo(size/2, -size/2);
+      ctx.lineTo(-size/2, -size/2);
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+
+    function drawRightTriangle(size, fill, stroke, flipX=false, flipY=false) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(size * (flipX ? -1 : 1), 0);
+      ctx.lineTo(0, size * (flipY ? -1 : 1));
+      ctx.closePath();
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+
+    function drawDiamond(size, fill, stroke) {
+      ctx.save();
+      ctx.rotate(Math.PI / 4);
+      drawSquare(size, fill, stroke);
+      ctx.restore();
+    }
+
+    function drawCircle(r, fill, stroke) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, 2 * Math.PI);
+      if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+      if (stroke) { ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.stroke(); }
+    }
+
+    // Fungsi poligon bebas
+    function poly(points, fill) {
+      ctx.beginPath();
+      ctx.moveTo(points[0][0], points[0][1]);
+      for (let i=1;i<points.length;i++) ctx.lineTo(points[i][0], points[i][1]);
+      ctx.closePath();
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = "black";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    /* ==== Gambar Utama ==== */
+    ctx.translate(CX, CY);
+
+    /* Pola background: diamond + layer zigzag hijau */
+    (function drawGreenPattern(){
+      const unit = 50; 
+      const cx = 0, cy = 0;
+
+      // layer tambahan oranye / krem
+      poly([[cx-unit,cy-unit],[cx+unit,cy-unit],[cx+2*unit,cy-2*unit],[cx-2*unit,cy-2*unit]], "#f7deba"); // atas
+      poly([[cx+unit,cy-unit],[cx+unit,cy+unit],[cx+2*unit,cy+2*unit],[cx+2*unit,cy-2*unit]], "#f09b52"); // kanan
+      poly([[cx-unit,cy+unit],[cx+unit,cy+unit],[cx+2*unit,cy+2*unit],[cx-2*unit,cy+2*unit]], "#f7deba"); // bawah
+      poly([[cx-unit,cy-unit],[cx-unit,cy+unit],[cx-2*unit,cy+2*unit],[cx-2*unit,cy-2*unit]], "#f09b52"); // kiri
+
+      // border zig-zag segitiga hijau
+      const colors = ["#77DD77"];
+      const side = 5;
+      const step = (4*unit)/side;
+
+      // sisi atas
+      for (let i=0; i<side; i++){
+        const x0 = cx-2*unit+i*step;
+        const x1 = x0+step;
+        const y0 = cy-2*unit;
+        poly([[x0,y0],[x1,y0],[x0+step/2,y0-step]], colors[0]);
+        if (i < side-1) {
+          const offset = step/2;
+          poly([[x0+offset,y0-step],[x1+offset,y0-step],[x0+step/2+offset,y0]], colors[0]);
+        }
+      }
+
+      // sisi kanan
+      for (let i=0; i<side; i++){
+        const y0 = cy-2*unit+i*step;
+        const y1 = y0+step;
+        const x0 = cx+2*unit;
+        poly([[x0,y0],[x0,y1],[x0+step,y0+step/2]], colors[0]);
+        if (i < side-1) {
+          const offset = step/2;
+          poly([[x0+step,y0+offset],[x0+step,y1+offset],[x0,y0+step/2+offset]], colors[0]);
+        }
+      }
+
+      // sisi bawah
+      for (let i=0; i<side; i++){
+        const x0 = cx-2*unit+i*step;
+        const x1 = x0+step;
+        const y0 = cy+2*unit;
+        poly([[x0,y0],[x1,y0],[x0+step/2,y0+step]], colors[0]);
+        if (i < side-1) {
+          const offset = step/2;
+          poly([[x0+offset,y0+step],[x1+offset,y0+step],[x0+step/2+offset,y0]], colors[0]);
+        }
+      }
+
+      // sisi kiri
+      for (let i=0; i<side; i++){
+        const y0 = cy-2*unit+i*step;
+        const y1 = y0+step;
+        const x0 = cx-2*unit;
+        poly([[x0,y0],[x0,y1],[x0-step,y0+step/2]], colors[0]);
+        if (i < side-1) {
+          const offset = step/2;
+          poly([[x0-step,y0+offset],[x0-step,y1+offset],[x0,y0+step/2+offset]], colors[0]);
+        }
+      }
+    })();
+
+    /* Frame biru muda luar */
+    ctx.save();
+    ctx.lineWidth = 40; 
+    ctx.strokeStyle = "#90e0ef";
+    ctx.strokeRect(-250, -250, 500, 500);
+    ctx.restore();
+
+    /* Frame kotak putih */
+    ctx.save();
+    drawSquare(450, null, "#000"); 
+    ctx.restore();
+
+    /* Kotak besar tengah */
+    drawSquare(100, "#40E0D0", "#000");
+
+    /* Kotak kecil kuning di dalam */
+    drawSquare(50, "#FFFF00", "#100");
+
+    /* Diamond hijau di pusat */
+    ctx.save();
+    ctx.rotate(Math.PI / 4);
+    drawSquare(35, "#2a9d8f", "#000"); 
+    ctx.restore();
+
+    /* Empat segitiga besar di sekeliling */
+    for (let i = 0; i < 4; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI/2); 
+      ctx.translate(0, -100);
+      const color = (i % 2 === 0) ? "#DC143C" : "#FF6961"; 
+      drawTriangle(120, color, "#000"); 
+      ctx.restore();
+    }
+
+    /* Kotak hijau kecil di sudut luar */
+    const offset = 200;
+    for (let i = 0; i < 4; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI/2);
+      ctx.translate(0, -offset);
+      drawSquare(40, "#2a9d8f", "#000"); 
+      ctx.restore();
+    }
+
+    /* Segitiga kecil ungu di tengah sisi */
+    const midOffset = 150;
+    for (let i = 0; i < 4; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI/2);
+      ctx.translate(0, -midOffset);
+      drawTriangle(60, "#c9a3e3", "#000"); 
+      ctx.restore();
+    }
+
+    /* Gigi segitiga kecil di luar */
+    const sideCount = 1; 
+    const spacing = 100 / sideCount; 
+    const toothSize = -20; 
+    for (let side = 0; side < 4; side++) {
+      ctx.save();
+      ctx.rotate(side * Math.PI/2); 
+      ctx.translate(-50 + spacing/2, -200); 
+      for (let i = 0; i < sideCount; i++) {
+        ctx.save();
+        ctx.translate(i * spacing, 0); 
+        drawTriangle(toothSize, "#264653", "#000"); 
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    /* Lingkaran kuning kecil di pojok kotak tengah */
+    for (let i = 0; i < 4; i++) {
+      ctx.save();
+      ctx.rotate(i * Math.PI/2);
+      ctx.translate(0, -40);
+      drawCircle(15, "#ffb703", "#000");
+      ctx.restore();
+    }
+
+    /* Segitiga siku hijau di pojok dekat kotak */
+    const greenHalf = 100;
+    for (let dx of [-1, 1]) {
+      for (let dy of [1, -1]) {
+        ctx.save();
+        ctx.translate(dx * (greenHalf + 10), dy * (greenHalf + 10));
+        ctx.scale(dx, dy);
+        drawRightTriangle(30, "#219ebc", "#000");
+        ctx.restore();
+      }
+    }
+
+    /* Segitiga siku biru tua di pojok tengah */
+    const BlueHalf = -155;
+    for (let dx of [-1, 1]) {
+      for (let dy of [1, -1]) {
+        ctx.save();
+        ctx.translate(dx * (BlueHalf + 10), dy * (BlueHalf + 10));
+        ctx.scale(dx, dy);
+        drawRightTriangle(30, "#264650", "#000");
+        ctx.restore();
+      }
+    }
+
+    /* Segitiga siku + persegi panjang miring di pojok luar */
+    const outerHalf = -195;
+    for (let dx of [-1, 1]) {
+      for (let dy of [1, -1]) {
+        ctx.save();
+        ctx.translate(dx * (outerHalf - 20), dy * (outerHalf - 20));
+        ctx.scale(dx, dy);
+
+        // segitiga siku biru
+        drawRightTriangle(40, "#00BFFF", "#000");
+
+        // persegi panjang miring kuning
+        ctx.translate(30, 30); 
+        ctx.rotate(Math.PI / 4); 
+        ctx.beginPath();
+        ctx.rect(10, -5, 40, 10); 
+        ctx.fillStyle = "#FFF44F";
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000";
+        ctx.stroke();
+
+        ctx.restore();
+      }
+    }
+  </script>
+</body>
+</html>
